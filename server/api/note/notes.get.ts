@@ -46,7 +46,7 @@ export default defineEventHandler(async (event)=>{
             noteIdList.push(v.note_id)
         })
         //查询文章表
-        const [notesRows] = await con.query('SELECT * FROM `notes` WHERE `uid`=? AND id IN (?)',
+        const [notesRows] = await con.query('SELECT id,title FROM `notes` WHERE `uid`=? AND id IN (?) ORDER BY `id` DESC',
             [uid,noteIdList]);
         console.log('notesRows',notesRows)
         //释放连接

@@ -5,6 +5,7 @@
 
 import {getDB} from "~/server/utils/db/mysql";
 import {getLoginUid, responseJson} from "~/server/utils/helper";
+import Joi from "joi";
 
 
 export default defineEventHandler(async (event)=>{
@@ -20,17 +21,34 @@ export default defineEventHandler(async (event)=>{
     //获取数据
     const params = await getQuery(event)
     console.log('body',params)
+    //校验数据joi
+    const schema = Joi.object({
+        noteId: Joi.number().required()
+    });
+    try {
+        const value = await schema.validateAsync(params);
+    }
+    catch (err) {
+        return  responseJson(1,'参数错误',{})
+    }
 
     const con = getDB()
     try {
         //获取用户文章
-        const [rows] = await con.query('SELECT * FROM `notes` WHERE `uid`=? LIMIT ? OFFSET ?',
-            [uid,Number(params.pageSize),(Number(params.page)-1)*Number(params.pageSize)]);
-        console.log('333333',rows)
+        const [rows] = await con.query('SELECT * FROM `notes` WHERE `uid`=? AND `id`=?',
+            [uid,params.noteId]);
+        console.log('33333',rows)
         //释放连接
         await con.end()
 
-        return  responseJson(0,'获取文章成功哦',{})
+        return  responseJson(0,'获取文章成功哦',{
+            list:{
+                id:rows[0].id,
+                title:rows[0].title,
+                content_md:rows[0].content_md,
+                state:rows[0].state
+            }
+        })
     }catch (e){
         //释放连接
         await con.end()

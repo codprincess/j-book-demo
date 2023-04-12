@@ -55,7 +55,7 @@
     </a-col>
     <a-col :span="5" class="note-writer-list">
       <!--文章列表-->
-      <div class="create" >
+      <div class="create" @click="createNote">
         <i-ep-circle-plus-filled/> 新建文章
       </div>
       <div class="note-create">
@@ -67,6 +67,7 @@
           <div
               class="note-create-item "
               :class="currentNoteIndex===noteIndex?'active':''"
+              @click="selectNote(noteItem,noteIndex)"
           >
             <i-ph-file-text-fill class="text-icon"/>
             <span>{{noteItem.title}}</span>
@@ -88,7 +89,7 @@
                       移动文章
                     </a-row>
                   </a-menu-item>
-                  <a-menu-item @click="deleteNoteBook">
+                  <a-menu-item @click="deleteNote(noteItem)">
                     <a-row type="flex" justify="center" align="middle">
                       <i-ep-delete style="margin-right: 5px"/>
                       删除文章
@@ -141,6 +142,18 @@
       <p style="margin-top: 30px">确认删除文集《{{delete_notebook.name}}》，文章将被移动到回收站。</p>
     </div>
   </a-modal>
+
+  <!--删除文章弹框-->
+  <a-modal
+      v-model:visible="deleteNoteVisible"
+      width="20%"
+      okText="提交"
+      cancelText="取消"
+      @ok="deleteNoteHandle">
+    <div>
+      <p style="margin-top: 30px">确认删除文章《{{current_note.title}}》，文章将被移动到回收站。</p>
+    </div>
+  </a-modal>
 </template>
 
 <script setup>
@@ -153,6 +166,7 @@ const plugins = [
   // Add more plugins here
 ]
 const { $message} = useNuxtApp()
+
 
 //获取文集下面的文章
 const notesData = ref([])
@@ -169,10 +183,13 @@ const getNotes = async (isServer,notebookId) => {
     throw createError({statusCode: 500,statusMessage:'服务器报错！'})
   }
   notesData.value = data.value.data.list
-  console.log('notesData',notesData.value)
+  getNote(true,notesData.value[0].id)
+ // console.log('notesData',notesData.value)
 }
 //获取文集
 const currentNotebookIndex = ref(0)
+//当前文集id
+const currentNotebookId = ref(0)
 const {data:notebookData,refresh} = await notebookFetch({
   method:'GET',
   server:true,
@@ -183,6 +200,7 @@ if (notebookData.value.code === 1){
 }
 if (notebookData.value.data && notebookData.value.data.list.length > 0) {
   const firstNotebook = notebookData.value.data.list[0]
+  currentNotebookId.value = firstNotebook.id
   getNotes(true,firstNotebook.id)
 }
 console.log('notebookData',notebookData)
@@ -193,6 +211,9 @@ console.log('notebookData',notebookData)
 //选中文集
 const selectNotebook = (item,index) =>{
   currentNotebookIndex.value = index
+  currentNotebookId.value = item.id
+  notesData.value = []
+  getNotes(false,item.id)
 }
 //新建文集
 const notebookName = ref('')
@@ -275,6 +296,72 @@ const deleteNotebookHandle = () => {
 
 //当前文章索引
 const currentNoteIndex = ref(0)
+//选中文章
+const selectNote = (item,index) => {
+  currentNoteIndex.value = index
+  getNote(false,item.id)
+}
+//新建文章
+const createNote = () => {
+  noteFetch({
+    method:'POST',
+    body:{
+      notebookId:currentNotebookId.value
+    },
+    server:false,
+    key:'createNote'
+  }).then(({data})=>{
+    if (data.value.code === 1){
+      $message.error(data.value.msg)
+      return
+    }
+    getNotes(false,currentNotebookId.value)
+  })
+}
+//删除文章
+const deleteNoteVisible = ref(false)
+const current_note = ref({})
+const deleteNote = (item) => {
+  current_note.value = item
+  deleteNoteVisible.value = true
+}
+
+const deleteNoteHandle = () => {
+  noteFetch({
+    method:'DELETE',
+    body:{
+      noteId:current_note.value.id
+    },
+    server:false,
+    key:'deleteNote'
+  }).then(({data})=>{
+    if (data.value.code === 1){
+      $message.error(data.value.msg)
+      return
+    }
+    $message.info('删除成功！')
+    deleteNoteVisible.value = false
+    getNotes(false,currentNotebookId.value)
+  })
+}
+
+//根据文章id获取文章内容
+const noteData = ref({})
+const getNote = async (isServer,noteId) => {
+  const {data} = await noteFetch({
+    method:'GET',
+    params:{
+      noteId:noteId
+    },
+    server:isServer,
+    key:'getNote'
+  })
+  if (data.value.code === 1){
+    throw createError({statusCode: 500,statusMessage:'服务器报错！'})
+  }
+  noteData.value = data.value.data.list
+  console.log('noteData',noteData.value)
+}
 
 //文章操作
 //发布文章

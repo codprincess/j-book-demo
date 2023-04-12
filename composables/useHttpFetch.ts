@@ -69,5 +69,10 @@ export const notebookFetch = (opt: myFetchOptions) => {
 export const notesFetch = (opt: myFetchOptions) => {
     return useHttpFetch('/api/note/notes', opt)
 }
+//新建文章
+export const noteFetch = (opt: myFetchOptions) => {
+    return useHttpFetch('/api/note/note', opt)
+}
+
 
 
