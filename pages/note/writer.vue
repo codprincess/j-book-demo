@@ -109,10 +109,10 @@
       <!--编辑-->
       <div class="edit-note">
         <div style="height: 80px;line-height: 80px">
-          <a-input style="font-size: 30px" :bordered="false" v-model:value="name" ></a-input>
+          <a-input @input="handleInput" style="font-size: 30px" :bordered="false" v-model:value="noteData.title" ></a-input>
         </div>
         <Editor
-            :value="content"
+            :value="noteData.content_md"
             :plugins="plugins"
             @change="handleChange"
             :uploadImages="uploadImages"
@@ -160,9 +160,29 @@
 import gfm from '@bytemd/plugin-gfm'
 import {Editor} from "@bytemd/vue-next";
 import 'bytemd/dist/index.css'
-import {notebookFetch, noteFetch, notesFetch} from "~/composables/useHttpFetch";
+import {cosAuthFetch, notebookFetch, noteFetch, notesFetch} from "~/composables/useHttpFetch";
+import {debounce} from 'lodash-es'
+import COS from 'cos-js-sdk-v5'
+import {useUserInfo} from "~/composables/state";
+import {getUUID} from "~/composables/useHelper";
 const plugins = [
   gfm(),
+  {
+    actions: [
+      {
+        title: '立即发布',
+        icon: '立即发布',
+        position:'right',
+        handler: {
+          type: 'action',
+          click(ctx) {
+           console.log('22222')
+            notePush(2)
+          },
+        },
+      },
+    ],
+  }
   // Add more plugins here
 ]
 const { $message} = useNuxtApp()
@@ -183,7 +203,9 @@ const getNotes = async (isServer,notebookId) => {
     throw createError({statusCode: 500,statusMessage:'服务器报错！'})
   }
   notesData.value = data.value.data.list
-  getNote(true,notesData.value[0].id)
+  if (isServer) {
+    getNote(true,notesData.value[0].id)
+  }
  // console.log('notesData',notesData.value)
 }
 //获取文集
@@ -213,6 +235,7 @@ const selectNotebook = (item,index) =>{
   currentNotebookIndex.value = index
   currentNotebookId.value = item.id
   notesData.value = []
+  currentNoteIndex.value = 0
   getNotes(false,item.id)
 }
 //新建文集
@@ -365,80 +388,122 @@ const getNote = async (isServer,noteId) => {
 
 //文章操作
 //发布文章
-const notePush = () => {
 
-}
-
-//编辑文章
-const content = ref(`
-
-### 安装Nuxt 3
-\`\`\`
-npx nuxi init <project-name>
-\`\`\`
-安装依赖项：
-\`\`\`
-npm install
-yarn install
-\`\`\`
-运行 Nuxt3，安装完成后，您可以使用以下命令运行 Nuxt3：
-\`\`\` shell
-npm run dev
-yarn dev
-\`\`\`
-然后，在浏览器中访问 http://localhost:3000/，您应该可以看到Nuxt3应用程序的默认欢迎页面。
-
-### 配置Ant design Vue
-
-#### 安装
-\`\`\` shell
-npm i ant-design-vue --save
-yarn add ant-design-vue
-\`\`\`
-#### 按需配置
-使用的 Vite，你可以使用 unplugin-vue-components 来进行按需加载。
-\`\`\` shell
-npm install unplugin-vue-components --save
-yarn add unplugin-vue-components --save
-\`\`\`
-在nuxt.config.ts中引入
-\`\`\` js
-import Components from 'unplugin-vue-components/vite'
-import { AntDesignVueResolver} from "unplugin-vue-components/resolvers";
-
-export default defineNuxtConfig({
-    vite: {
-        plugins: [
-            // 按需引入组件
-            Components({
-                resolvers: [AntDesignVueResolver()]
-            })
-        ],
-
-        // ssr
-        ssr: {
-            noExternal: ['ant-design-vue'],
-        }
+const notePush = (state) => {
+  noteFetch({
+    method:'PUT',
+    body:{
+      noteId:noteData.value.id,
+      title:noteData.value.title,
+      content_md:noteData.value.content_md,
+      state:state,
+    },
+    server:false,
+    key:'notePush'
+  }).then(({data})=>{
+    if (data.value.code === 1){
+      $message.error(data.value.msg)
+      return
     }
-})
-\`\`\``)
-//文章名称
-const name = ref('2023-03-20')
-const handleChange = (e) => {
-  content.value = e
-  console.log('content.value',content.value)
+    if (state === 2){
+      $message.info('发布成功！')
+    }
+    getNotes(false,currentNotebookId.value)
+  })
 }
+
+//防抖函数
+// const debounce = (func,delay) => {
+//   let timer = null
+//   return function () {
+//     if (timer) {
+//       clearTimeout(timer)
+//     }
+//     timer = setTimeout(()=>{
+//       func.apply(this,arguments)
+//     },delay)
+//   }
+// }
+
+const save = () => {
+  notePush(1)
+}
+
+const saveContent = (e) => {
+  noteData.value.content_md = e
+  notePush(1)
+}
+
+const handleInput = debounce(save,1000)
+
+const handleChange =  debounce(saveContent,1000)
+//编辑文章
+let cos = null
+if (process.client) {
+  console.log('COS',COS)
+   cos = new COS({
+    // getAuthorization 必选参数
+    getAuthorization: function (options, callback) {
+      // 初始化时不会调用，只有调用 cos 方法（例如 cos.putObject）时才会进入
+      // 异步获取临时密钥
+      // 服务端 JS 和 PHP 例子：https://github.com/tencentyun/cos-js-sdk-v5/blob/master/server/
+      // 服务端其他语言参考 COS STS SDK ：https://github.com/tencentyun/qcloud-cos-sts-sdk
+      // STS 详细文档指引看：https://cloud.tencent.com/document/product/436/14048
+
+      cosAuthFetch({
+        server:false,
+        params:{
+          type:'note'
+        }
+      }).then(({data}) => {
+        if (data.value.code === 1) {
+          $message.error(data.value.msg)
+          return
+        }
+        data = data.value.data
+        console.log('data',data)
+        callback({
+          TmpSecretId: data.credentials.tmpSecretId,
+          TmpSecretKey: data.credentials.tmpSecretKey,
+          SecurityToken: data.credentials.sessionToken,
+          // 建议返回服务器时间作为签名的开始时间，避免用户浏览器本地时间偏差过大导致签名错误
+          StartTime: data.startTime, // 时间戳，单位秒，如：1580000000
+          ExpiredTime: data.expiredTime, // 时间戳，单位秒，如：1580000000
+        });
+      })
+
+    }
+  });
+}
+
+let uid = useUserInfo().value.id
+const config = useRuntimeConfig()
 //上传图片
-const uploadImages = (files) => {
+const uploadImages = async (files) => {
   console.log('files',files)
   // TODO... 上传文件的代码
+  return Promise.all(
+      files.map(async (file) => {
+        const ext = file.name.slice(file.name.lastIndexOf(".") + 1)
+        let key = "uploads/"+ uid + "/note/" + getUUID() + "." +  ext
+       const res = await cos.putObject({
+          Bucket: config.public.BUCKET, /* 填入您自己的存储桶，必须字段 */
+          Region: config.public.REGION,  /* 存储桶所在地域，例如ap-beijing，必须字段 */
+          Key: key,  /* 存储在桶里的对象键（例如1.jpg，a/b/test.txt），必须字段 */
+          Body: file, /* 必须，上传文件对象，可以是input[type="file"]标签选择本地文件后得到的file对象 */
+          onProgress: function(progressData) {
+            console.log(JSON.stringify(progressData));
+          }
+        });
+        console.log('res',res)
+        return {
+          url:"//"+res.Location
+        }
 
-  return [
-    {
-      title: files.map((i) => i.name),
-      url: 'http' // 这里需要的是自己上传服务器返回的地址
-    }
-  ]
+
+      })
+  )
+
 }
 
 </script>
@@ -583,6 +648,12 @@ const uploadImages = (files) => {
 
 .edit-note .bytemd{
   height: calc(100vh - 80px) !important;
+}
+.edit-note .bytemd-toolbar-right [bytemd-tippy-path='5'] {
+  display: none;
+}
+.edit-note .bytemd-body img{
+  width: 100%;
 }
 
 </style>

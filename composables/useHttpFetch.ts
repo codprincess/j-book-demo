@@ -74,5 +74,10 @@ export const noteFetch = (opt: myFetchOptions) => {
     return useHttpFetch('/api/note/note', opt)
 }
 
+//文章图片上传腾讯云
+export const cosAuthFetch = (opt: myFetchOptions) => {
+    return useHttpFetch('/api/cos/auth', opt)
+}
+
 
 

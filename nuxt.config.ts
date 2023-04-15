@@ -13,7 +13,8 @@ export default defineNuxtConfig({
         SecretKey:process.env.SECRET_KEY,
         public:{
             //公开
-            api:''
+            BUCKET: process.env.BUCKET,
+            REGION: process.env.REGION,
         }
     },
     modules:['@pinia/nuxt','@pinia-plugin-persistedstate/nuxt'],

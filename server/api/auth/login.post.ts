@@ -55,6 +55,7 @@ export default defineEventHandler(async (event)=>{
         return responseJson(0,'ok',{
             accessToken:token,
             userInfo:{
+                id:rows[0].id,
                 nickname:rows[0].nickname,
                 phone:rows[0].phone,
                 avatar:rows[0].avatar,

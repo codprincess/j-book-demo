@@ -17,6 +17,7 @@
     "@pinia-plugin-persistedstate/nuxt": "^1.1.1",
     "@pinia/nuxt": "^0.4.7",
     "ant-design-vue": "^3.2.15",
+    "cos-js-sdk-v5": "^1.4.16",
     "cos-nodejs-sdk-v5": "^2.11.19",
     "joi": "^17.9.1",
     "jsonwebtoken": "^9.0.0",
@@ -24,8 +25,10 @@
     "md5": "^2.3.0",
     "mysql2": "^3.2.0",
     "pinia": "^2.0.33",
+    "qcloud-cos-sts": "^3.1.0",
     "sass": "^1.60.0",
     "unplugin-icons": "^0.16.1",
-    "unplugin-vue-components": "^0.24.1"
+    "unplugin-vue-components": "^0.24.1",
+    "uuid": "^9.0.0"
   }
 }

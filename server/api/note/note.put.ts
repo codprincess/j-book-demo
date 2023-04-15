@@ -24,8 +24,8 @@ export default defineEventHandler(async (event)=>{
     //校验数据joi
     const schema = Joi.object({
         noteId: Joi.number().required(),
-        title:Joi.string().required(),
-        content_md:Joi.string().required(),
+        title:Joi.string().allow(''),
+        content_md:Joi.string().allow(''),
         state:Joi.number().required(),
     });
     try {
