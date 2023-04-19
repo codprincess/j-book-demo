@@ -4,7 +4,7 @@
     <a-col :span="4">
       <div class="notebook">
         <div class="notebook-top">
-          <a-button class="go-btn" type="primary" ghost shape="round">回首页</a-button>
+          <a-button @click="goHome"  class="go-btn" type="primary" ghost shape="round">回首页</a-button>
           <div @click="showModal" class="add-notebook"><i-mdi-plus-thick/>新建文集</div>
           <div class="create-notebook" v-if="showCreateNb">
             <a-input v-model:value="notebookName" class="notebook-input" placeholder="请输入文集名称..."></a-input>
@@ -16,9 +16,9 @@
         </div>
         <div class="notebook-center">
           <template
-            v-if="notebookData.data"
-            v-for="(notebookItem,notebookIndex) in notebookData.data.list"
-            :key="notebookItem.id"
+              v-if="notebookData.data"
+              v-for="(notebookItem,notebookIndex) in notebookData.data.list"
+              :key="notebookItem.id"
           >
             <div
                 class="notebook-c-item "
@@ -60,9 +60,9 @@
       </div>
       <div class="note-create">
         <template
-          v-if="notesData"
-          v-for="(noteItem,noteIndex) in notesData"
-          :key="noteItem.id"
+            v-if="notesData"
+            v-for="(noteItem,noteIndex) in notesData"
+            :key="noteItem.id"
         >
           <div
               class="note-create-item "
@@ -165,28 +165,53 @@ import {debounce} from 'lodash-es'
 import COS from 'cos-js-sdk-v5'
 import {useUserInfo} from "~/composables/state";
 import {getUUID} from "~/composables/useHelper";
-const plugins = [
+const plugins = ref([
   gfm(),
-  {
-    actions: [
-      {
-        title: '立即发布',
-        icon: '立即发布',
-        position:'right',
-        handler: {
-          type: 'action',
-          click(ctx) {
-           console.log('22222')
-            notePush(2)
+  // Add more plugins here
+])
+
+const { $message} = useNuxtApp()
+const goHome = () => {
+  navigateTo('/')
+}
+//改变文章状态
+const changeState = () => {
+  let text = ""
+  switch (noteData.value.state) {
+    case 1:
+      text = "立即发布"
+      break;
+    case 2:
+      text = "已发布"
+      break;
+    case 3:
+      text = "发布更新"
+      break;
+    default:
+      break;
+  }
+  //改变按钮
+  plugins.value = [
+    gfm(),
+    {
+      actions: [
+        {
+          title: text,
+          icon: text,
+          position:'right',
+          handler: {
+            type: 'action',
+            click(ctx) {
+              console.log('22222')
+              noteData.value.state = 2
+              notePush()
+            },
           },
         },
-      },
-    ],
-  }
-  // Add more plugins here
-]
-const { $message} = useNuxtApp()
-
+      ],
+    }
+  ]
+}
 
 //获取文集下面的文章
 const notesData = ref([])
@@ -204,9 +229,10 @@ const getNotes = async (isServer,notebookId) => {
   }
   notesData.value = data.value.data.list
   if (isServer) {
+    isLoad.value = true
     getNote(true,notesData.value[0].id)
   }
- // console.log('notesData',notesData.value)
+  // console.log('notesData',notesData.value)
 }
 //获取文集
 const currentNotebookIndex = ref(0)
@@ -236,7 +262,7 @@ const selectNotebook = (item,index) =>{
   currentNotebookId.value = item.id
   notesData.value = []
   currentNoteIndex.value = 0
-  getNotes(false,item.id)
+  getNotes(true,item.id)
 }
 //新建文集
 const notebookName = ref('')
@@ -320,8 +346,11 @@ const deleteNotebookHandle = () => {
 //当前文章索引
 const currentNoteIndex = ref(0)
 //选中文章
+//是否加载文章
+const isLoad = ref(false)
 const selectNote = (item,index) => {
   currentNoteIndex.value = index
+  isLoad.value = true
   getNote(false,item.id)
 }
 //新建文章
@@ -384,19 +413,20 @@ const getNote = async (isServer,noteId) => {
   }
   noteData.value = data.value.data.list
   console.log('noteData',noteData.value)
+  changeState()
 }
 
 //文章操作
 //发布文章
 
-const notePush = (state) => {
+const notePush = () => {
   noteFetch({
     method:'PUT',
     body:{
       noteId:noteData.value.id,
       title:noteData.value.title,
       content_md:noteData.value.content_md,
-      state:state,
+      state:noteData.value.state,
     },
     server:false,
     key:'notePush'
@@ -405,10 +435,11 @@ const notePush = (state) => {
       $message.error(data.value.msg)
       return
     }
-    if (state === 2){
+    if (noteData.value.state === 2){
       $message.info('发布成功！')
     }
     getNotes(false,currentNotebookId.value)
+    changeState()
   })
 }
 
@@ -426,22 +457,34 @@ const notePush = (state) => {
 // }
 
 const save = () => {
-  notePush(1)
+  if (isLoad.value) {
+    isLoad.value = false
+    return
+  }
+  noteData.value.state = noteData.value.state === 2 ? 3 : 1
+  notePush()
 }
 
-const saveContent = (e) => {
+const saveContent = debounce((e) => {
+  if (isLoad.value) {
+    isLoad.value = false
+    return
+  }
   noteData.value.content_md = e
-  notePush(1)
-}
+  noteData.value.state = noteData.value.state === 2 ? 3 : 1
+  notePush()
+},1000)
 
 const handleInput = debounce(save,1000)
 
-const handleChange =  debounce(saveContent,1000)
+const handleChange =  (v) => {
+  saveContent(v)
+}
 //编辑文章
 let cos = null
 if (process.client) {
   console.log('COS',COS)
-   cos = new COS({
+  cos = new COS({
     // getAuthorization 必选参数
     getAuthorization: function (options, callback) {
       // 初始化时不会调用，只有调用 cos 方法（例如 cos.putObject）时才会进入
@@ -486,7 +529,7 @@ const uploadImages = async (files) => {
       files.map(async (file) => {
         const ext = file.name.slice(file.name.lastIndexOf(".") + 1)
         let key = "uploads/"+ uid + "/note/" + getUUID() + "." +  ext
-       const res = await cos.putObject({
+        const res = await cos.putObject({
           Bucket: config.public.BUCKET, /* 填入您自己的存储桶，必须字段 */
           Region: config.public.REGION,  /* 存储桶所在地域，例如ap-beijing，必须字段 */
           Key: key,  /* 存储在桶里的对象键（例如1.jpg，a/b/test.txt），必须字段 */

@@ -79,5 +79,10 @@ export const cosAuthFetch = (opt: myFetchOptions) => {
     return useHttpFetch('/api/cos/auth', opt)
 }
 
+//获取文章列表
+export const homeNotesFetch = (opt: myFetchOptions) => {
+    return useHttpFetch('/api/home/notes', opt)
+}
+
 
 
