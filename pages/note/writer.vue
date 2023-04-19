@@ -112,7 +112,8 @@
           <a-input @input="handleInput" style="font-size: 30px" :bordered="false" v-model:value="noteData.title" ></a-input>
         </div>
         <Editor
-            :value="noteData.content_md"
+            ref="editor"
+            v-model:value="noteData.content_md"
             :plugins="plugins"
             @change="handleChange"
             :uploadImages="uploadImages"
@@ -171,6 +172,7 @@ const plugins = ref([
 ])
 
 const { $message} = useNuxtApp()
+const editor = ref(null)
 const goHome = () => {
   navigateTo('/')
 }
@@ -212,7 +214,10 @@ const changeState = () => {
     }
   ]
 }
+onMounted(()=>{
+  console.log(editor.value='asdjkaljaksd')
 
+})
 //获取文集下面的文章
 const notesData = ref([])
 const getNotes = async (isServer,notebookId) => {
@@ -230,7 +235,9 @@ const getNotes = async (isServer,notebookId) => {
   notesData.value = data.value.data.list
   if (isServer) {
     isLoad.value = true
-    getNote(true,notesData.value[0].id)
+    if (notesData.value.length){
+      getNote(true,notesData.value[0].id)
+    }
   }
   // console.log('notesData',notesData.value)
 }
@@ -238,7 +245,7 @@ const getNotes = async (isServer,notebookId) => {
 const currentNotebookIndex = ref(0)
 //当前文集id
 const currentNotebookId = ref(0)
-const {data:notebookData,refresh} = await notebookFetch({
+const {data:notebookData,refresh:refresh} = await notebookFetch({
   method:'GET',
   server:true,
   key:'notebookFetch'
@@ -251,7 +258,6 @@ if (notebookData.value.data && notebookData.value.data.list.length > 0) {
   currentNotebookId.value = firstNotebook.id
   getNotes(true,firstNotebook.id)
 }
-console.log('notebookData',notebookData)
 
 
 
@@ -261,6 +267,8 @@ const selectNotebook = (item,index) =>{
   currentNotebookIndex.value = index
   currentNotebookId.value = item.id
   notesData.value = []
+  noteData.value = {}
+  noteData.value.content_md = ''
   currentNoteIndex.value = 0
   getNotes(true,item.id)
 }
@@ -280,6 +288,8 @@ const addNotebook = () =>{
       return
     }
     refresh()
+    notesData.value = []
+    noteData.value = {}
     showCreateNb.value =false
   })
 }

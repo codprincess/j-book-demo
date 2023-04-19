@@ -41,6 +41,12 @@ export default defineEventHandler(async (event)=>{
 
         //查询文章
         let noteIdList:any = []
+       if (notebookRows.length < 1){
+           return  responseJson(0,'无数据',{
+               list:[]
+           })
+       }
+
         //遍历文章id
         notebookRows.map((v:any)=>{
             noteIdList.push(v.note_id)
