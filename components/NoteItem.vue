@@ -2,20 +2,22 @@
   <a-row class="note-item"
          v-if="props.note"
   >
-    <a-col :span="17">
-      <NuxtLink class="title">{{props.note.title}}</NuxtLink>
-      <p class="abstract"> {{props.note.content_md}}</p>
+    <a-col :span="props.note.cover?17:23">
+      <NuxtLink :to="{path:'/p/'+props.note.id}" class="title">{{props.note.title}}</NuxtLink>
+      <p class="abstract"> {{props.note.subTitle}}</p>
       <a-row class="meta">
         <a-col class="jsd-meta"><i-ion-diamond/>136.0</a-col>
-        <NuxtLink class="nickname">干物妹小埋</NuxtLink>
+        <NuxtLink class="nickname">{{props.note.nickname}}</NuxtLink>
         <NuxtLink class="comments"><i-mdi-message/> 10</NuxtLink>
-        <NuxtLink class="like"><i-mdi-cards-heart />23</NuxtLink>
+        <NuxtLink class="like" @click="likeClick">
+          <i-mdi-cards-heart :style="{color:props.note.flag?'red':''}" />{{props.note.like}}
+        </NuxtLink>
       </a-row>
     </a-col>
     <a-col :span="1"></a-col>
-    <a-col :span="6">
-      <NuxtLink class="note-img" style="">
-        <img   src="https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png" alt="" >
+    <a-col :span="6" v-if="props.note.cover">
+      <NuxtLink :to="{path:'/p/'+props.note.id}" class="note-img" style="">
+        <img   :src="props.note.cover" alt="cover" >
       </NuxtLink>
     </a-col>
   </a-row>
@@ -24,7 +26,12 @@
 <script setup>
 const props = defineProps(["note","index"])
 
-console.log('props',props)
+
+const emit = defineEmits(['like'])
+//模拟点赞
+function likeClick(){
+  emit('like',props.note.like,props.index,props.note.flag)
+}
 const lists = reactive({
   data:[
     {id:1,item:'item 1'},

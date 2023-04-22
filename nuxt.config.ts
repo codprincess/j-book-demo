@@ -27,7 +27,7 @@ export default defineNuxtConfig({
                     }),
                     IconsResolver({
                         prefix:'i',
-                        enabledCollections:['ep','ant-design','mdi','ph']
+                        enabledCollections:['ep','ant-design','mdi','ph','ion']
                     })
                 ],
 

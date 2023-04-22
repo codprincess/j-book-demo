@@ -326,6 +326,13 @@
   dependencies:
     remark-gfm "^3.0.1"
 
+"@bytemd/plugin-highlight@^1.21.0":
+  version "1.21.0"
+  resolved "https://registry.yarnpkg.com/@bytemd/plugin-highlight/-/plugin-highlight-1.21.0.tgz#b19cc18847eca10b6f254ff2da6e2d072db0738c"
+  integrity sha512-JM9rwzj9pFBXVwxmD9mgGIQPO4cTFVHvDhffS93IMK+tqvo0Vw76zDIqJWT3f421j8iNxffGsVQQs6389u3Z9A==
+  dependencies:
+    highlight.js "^11.7.0"
+
 "@bytemd/vue-next@^1.21.0":
   version "1.21.0"
   resolved "https://registry.yarnpkg.com/@bytemd/vue-next/-/vue-next-1.21.0.tgz#04ba75c8d9580cb6a145a791e155771737f6d155"
@@ -3022,6 +3029,11 @@ hastscript@^7.0.0:
     property-information "^6.0.0"
     space-separated-tokens "^2.0.0"
 
+highlight.js@^11.7.0:
+  version "11.7.0"
+  resolved "https://registry.yarnpkg.com/highlight.js/-/highlight.js-11.7.0.tgz#3ff0165bc843f8c9bce1fd89e2fda9143d24b11e"
+  integrity sha512-1rRqesRFhMO/PRF+G86evnyJkCgaZFOI+Z6kdj15TA18funfoqJXvgPCLSf0SWq3SRfg1j3HlDs8o4s3EGq1oQ==
+
 hookable@^5.5.1, hookable@^5.5.3:
   version "5.5.3"
   resolved "https://registry.yarnpkg.com/hookable/-/hookable-5.5.3.tgz#6cfc358984a1ef991e2518cb9ed4a778bbd3215d"
@@ -4278,6 +4290,11 @@ mlly@^1.0.0, mlly@^1.1.1, mlly@^1.2.0:
     pathe "^1.1.0"
     pkg-types "^1.0.2"
     ufo "^1.1.1"
+
+moment@^2.29.4:
+  version "2.29.4"
+  resolved "https://registry.yarnpkg.com/moment/-/moment-2.29.4.tgz#3dbe052889fe7c1b2ed966fcb3a77328964ef108"
+  integrity sha512-5LC9SOxjSc2HF6vO2CyuTDNivEdoz2IvyJJGj6X8DJ0eFyfszE0QiEd+iXmBvUP3WHxSjFH/vIsA0EN00cgr8w==
 
 mri@^1.1.0, mri@^1.2.0:
   version "1.2.0"

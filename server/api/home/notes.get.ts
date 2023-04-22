@@ -4,7 +4,7 @@
  */
 
 import {getDB} from "~/server/utils/db/mysql";
-import {getLoginUid, responseJson} from "~/server/utils/helper";
+import {getFirstImage, getLoginUid, responseJson, trimMarkdown} from "~/server/utils/helper";
 
 
 export default defineEventHandler(async (event)=>{
@@ -16,13 +16,22 @@ export default defineEventHandler(async (event)=>{
     const con = getDB()
     try {
         //获取用户文章
-        const [rows] = await con.query('SELECT * FROM `notes` LIMIT ? OFFSET ?',
-            [Number(params.pageSize),(Number(params.page)-1)*Number(params.pageSize)]);
+        const [notesData] = await con.query('SELECT notes.id AS id,notes.title,notes.content_md,notes.uid,users.nickname FROM `notes` LEFT JOIN `users` ON notes.uid = users.id WHERE `state`=? LIMIT ? OFFSET ?',
+            [2,Number(params.pageSize),(Number(params.page)-1)*Number(params.pageSize)]);
+        notesData.map((v:any)=>{
+            v.subTitle = trimMarkdown(v.content_md,300)
+            v.cover = getFirstImage(v.content_md)
+            v.like = 45
+            v.content_md = ''
+            v.flag = false
+
+        })
+
         //释放连接
         await con.end()
 
         return  responseJson(0,'获取文章成功哦',{
-            list:rows
+            list:notesData
         })
     }catch (e){
         //释放连接
