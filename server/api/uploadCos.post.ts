@@ -6,6 +6,7 @@
 import {getDB} from "~/server/utils/db/mysql";
 import { getLoginUid, responseJson} from "~/server/utils/helper";
 import COS from 'cos-nodejs-sdk-v5'
+import {getUUID} from "~/composables/useHelper";
 
 
 export default defineEventHandler(async (event)=>{
@@ -35,12 +36,15 @@ export default defineEventHandler(async (event)=>{
         const fileName = Date.now()+'-'+body[0].filename
         //图片数据
         const buffer = body[0].data
-
+        //图片后缀
+        const ext = fileName.slice(fileName.lastIndexOf(".")+1)
+        //key
+        let key = "uploads/"+ uid + "/avatar/" + getUUID() + "." +  ext
         //请求文件
         const data = await cos.putObject({
-            Bucket: 'jbook-1253664256', /* 必须 */
-            Region: 'ap-shanghai',    /* 必须 */
-            Key: fileName,              /* 必须 */
+            Bucket: config.public.BUCKET, /* 必须 */
+            Region: config.public.REGION,    /* 必须 */
+            Key: key,              /* 必须 */
             Body: buffer, // 上传文件对象
         })
         console.log('data',data)

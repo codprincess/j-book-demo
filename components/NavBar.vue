@@ -61,7 +61,7 @@
                         <NuxtLink class="select-user"><i-ep-collection-tag /> 收藏文章</NuxtLink>
                       </a-menu-item>
                       <a-menu-item>
-                        <NuxtLink class="select-user"><i-ep-setting /> 设置</NuxtLink>
+                        <NuxtLink to="/user/settings" class="select-user"><i-ep-setting /> 设置</NuxtLink>
                       </a-menu-item>
                       <a-menu-item>
                         <NuxtLink class="select-user"><i-ant-design-logout-outlined /> 退出</NuxtLink>
@@ -99,7 +99,7 @@ const go = () => {
   line-height: 56px !important;
   position: fixed;
   width: 100%;
-  z-index: 9999;
+  z-index: 99;
   .logo{
     height:30px;
   }

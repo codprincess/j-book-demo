@@ -88,5 +88,13 @@ export const homeNotesFetch = (opt: myFetchOptions) => {
 export const noteDetailFetch = (opt: myFetchOptions) => {
     return useHttpFetch('/api/home/detail', opt)
 }
+//上传头像到腾讯云
+export const uploadCosFetch = (opt: myFetchOptions) => {
+    return useHttpFetch('/api/uploadCos', opt)
+}
+//修改用户信息
+export const editUserFetch = (opt: myFetchOptions) => {
+    return useHttpFetch('/api/auth/user', opt)
+}
 
 
