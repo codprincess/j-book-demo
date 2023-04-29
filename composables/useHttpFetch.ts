@@ -6,6 +6,22 @@ interface myFetchOptions {
     [key: string]: any
 }
 
+const getBaseUrl = () => {
+    let baseURL = ''
+    if (process.env.NODE_ENV === 'production') {
+        //生产环境
+        if (process.server) {
+            //SSR请求内网
+            baseURL = 'http://127.0.0.1:3000/'
+        }else {
+            baseURL = 'http://jbook.XXX.com/'
+        }
+    }else {
+        //本地开发环境
+        baseURL = 'http://127.0.0.1:3000/'
+    }
+    return baseURL
+}
 export const useHttpFetch =  (url: string, opt: myFetchOptions) => {
     //token
     const accessToken = useCookie('accessToken')
@@ -18,7 +34,7 @@ export const useHttpFetch =  (url: string, opt: myFetchOptions) => {
     const nuxtApp = useNuxtApp()
     return useFetch(url, {
         ...opt,
-        baseURL: 'http://localhost:3000/',//基本url
+        baseURL: getBaseUrl(),//基本url
          onRequest({request, options}) {
             console.log('request', request)
         },

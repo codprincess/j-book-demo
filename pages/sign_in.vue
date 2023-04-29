@@ -137,7 +137,8 @@ const login = () =>{
     const userInfoCookie = useCookie('userInfo',{maxAge:60*60*24*7})
     userInfoCookie.value = data.value.data.userInfo
 
-    navigateTo('/')
+    // navigateTo('/')
+    window.location.href="/"
   })
 }
 
