@@ -9,7 +9,7 @@
               <img class="logo" alt="logo" src="/images/logo.png" />
             </NuxtLink>
           </a-col>
-          <a-col :span="16">
+          <a-col :span="15">
             <a-row type="flex"  align="middle">
               <a-col :span="3" class="nav-item ">
                 <NuxtLink to="/" class="active"> <i-mdi-compass-outline /> 发现</NuxtLink>
@@ -40,14 +40,18 @@
               </a-col>
             </a-row>
           </a-col>
-          <a-col :span="4">
+          <a-col :span="5">
             <a-row type="flex" justify="space-around">
               <a-col>
-                <a-dropdown>
+                <div v-if="!userInfo">
+                  <a-button @click="signIn" type="text">登录</a-button>
+                  <a-button @click="signUp" shape="round" ghost type="primary">注册</a-button>
+                </div>
+                <a-dropdown v-else>
                   <div class="avatar">
                     <a-avatar :size="40">
                       <template #icon>
-                        <img :src="avatar?avatar:'/images/default-avatar.png'" alt="avatar">
+                        <img :src="userInfo?userInfo.avatar:'/images/default-avatar.png'" alt="avatar">
                       </template>
                     </a-avatar>
                     <i-ant-design-caret-down-filled/>
@@ -63,7 +67,7 @@
                       <a-menu-item>
                         <NuxtLink to="/user/settings" class="select-user"><i-ep-setting /> 设置</NuxtLink>
                       </a-menu-item>
-                      <a-menu-item>
+                      <a-menu-item @click="logout">
                         <NuxtLink class="select-user"><i-ant-design-logout-outlined /> 退出</NuxtLink>
                       </a-menu-item>
                     </a-menu>
@@ -85,9 +89,22 @@
 </template>
 
 <script lang="ts" setup>
-const avatar = useUserInfo().value.avatar
+
+const userInfo = useUserInfo().value
 const go = () => {
   navigateTo('/note/writer')
+}
+//退出登录
+const logout = () => {
+  const useUserInfoCookie = useCookie('userInfo')
+  useUserInfoCookie.value = ''
+  window.location.reload()
+}
+const signIn = () => {
+  navigateTo('/sign_in')
+}
+const signUp = () => {
+  navigateTo('/sign_up')
 }
 </script>
 

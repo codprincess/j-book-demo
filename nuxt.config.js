@@ -11,6 +11,10 @@ export default defineNuxtConfig({
       //私密
         SecretId:process.env.SECRET_ID,
         SecretKey:process.env.SECRET_KEY,
+        DB_HOST:process.env.DB_HOST,
+        DB_USER:process.env.DB_USER,
+        DB_DATABASE:process.env.DB_DATABASE,
+        DB_PASSWORD:process.env.DB_PASSWORD,
         public:{
             //公开
             BUCKET: process.env.BUCKET,
@@ -19,6 +23,14 @@ export default defineNuxtConfig({
     },
     modules:['@pinia/nuxt','@pinia-plugin-persistedstate/nuxt'],
     vite: {
+        esbuild : {
+          drop: process.env.NODE_ENV === 'production' ? ['console','debugger'] :[]
+        },
+        build :{
+          minify: 'esbuild',
+          chunkSizeWarningLimit: 500,
+          cssCodeSplit: true
+        },
         plugins: [
             Components({
                 resolvers: [
@@ -50,5 +62,5 @@ export default defineNuxtConfig({
         ssr:{
             noExternal:['ant-design-vue']
         }
-    },
+    }
 })
