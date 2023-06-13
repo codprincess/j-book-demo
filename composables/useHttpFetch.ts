@@ -14,7 +14,7 @@ const getBaseUrl = () => {
             //SSR请求内网
             baseURL = 'http://127.0.0.1:3000/'
         }else {
-            baseURL = 'http://jbook.tehub.cn/'
+            baseURL = 'http://jbook.XXX.com/'
         }
     }else {
         //本地开发环境
@@ -44,12 +44,13 @@ export const useHttpFetch =  (url: string, opt: myFetchOptions) => {
         },
          async onResponse({request, response, options}) {
             // Process the response data
-             if (response._data.code === 0){
-                //处理
-                 response._data = response._data.data
-             }else{
-
-             }
+             //自定义处理数据
+             // if (response._data.code === 0){
+             //    //处理
+             //     response._data = response._data.data
+             // }else{
+             //
+             // }
 
         },
         async onResponseError({request, response, options}) {
