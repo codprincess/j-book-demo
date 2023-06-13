@@ -65,6 +65,7 @@ const {data:noteListData} = await homeNotesFetch({
   },
   key:'noteList'
 })
+console.log('6666',noteListData)
 if (noteListData.value.code === 1) {
   throw createError({statusCode:500,statusMessage:'服务器报错~~'})
 }
@@ -94,6 +95,7 @@ const loadMore = () => {
           pageSize:5
         }
       }).then(({data})=>{
+          console.log('4444',data)
         if (data.value.code === 1){
           throw createError({statusCode:500,statusMessage:'服务器报错~~'})
         }
