@@ -8,7 +8,7 @@
     "postinstall": "nuxt prepare"
   },
   "devDependencies": {
-    "nuxt": "^3.4.1"
+    "nuxt": "^3.7.4"
   },
   "dependencies": {
     "@bytemd/plugin-gfm": "^1.21.0",
@@ -20,7 +20,7 @@
     "ant-design-vue": "^3.2.15",
     "cos-js-sdk-v5": "^1.4.16",
     "cos-nodejs-sdk-v5": "^2.11.19",
-    "joi": "^17.9.1",
+    "joi": "^17.11.0",
     "jsonwebtoken": "^9.0.0",
     "less": "^4.1.3",
     "md5": "^2.3.0",

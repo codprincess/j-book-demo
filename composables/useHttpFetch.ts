@@ -20,6 +20,7 @@ const getBaseUrl = () => {
         //本地开发环境
         baseURL = 'http://127.0.0.1:3000/'
     }
+    baseURL = 'http://127.0.0.1:3000/'
     return baseURL
 }
 export const useHttpFetch =  (url: string, opt: myFetchOptions) => {

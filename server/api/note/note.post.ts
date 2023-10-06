@@ -29,6 +29,7 @@ export default defineEventHandler(async (event)=>{
         const value = await schema.validateAsync(body);
     }
     catch (err) {
+        console.log("参数错误",err)
         return  responseJson(1,'参数错误',{})
     }
 
